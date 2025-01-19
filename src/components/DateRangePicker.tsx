@@ -4,7 +4,10 @@ import "./DateRangePicker.css";
 
 interface PredefinedRange {
   label: string;
-  value: string;
+  getValue: () => {
+    startDate: Date;
+    endDate: Date;
+  };
 }
 
 interface DateRangePickerProps {
@@ -67,6 +70,38 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
 
     return weekends;
+  };
+
+  const getFirstWeekday = (date: Date): Date => {
+    const result = new Date(date);
+    while (isWeekend(result)) {
+      result.setDate(result.getDate() - 1);
+    }
+    return result;
+  };
+
+  const getLastWeekday = (date: Date): Date => {
+    const result = new Date(date);
+    while (isWeekend(result)) {
+      result.setDate(result.getDate() + 1);
+    }
+    return result;
+  };
+
+  const handlePredefinedRange = (range: PredefinedRange): void => {
+    const { startDate: newStartDate, endDate: newEndDate } = range.getValue();
+
+    // Adjust dates to nearest weekdays if they fall on weekends
+    const adjustedStartDate = getFirstWeekday(newStartDate);
+    const adjustedEndDate = getLastWeekday(newEndDate);
+
+    setStartDate(adjustedStartDate);
+    setEndDate(adjustedEndDate);
+
+    onChange?.(
+      [formatDate(adjustedStartDate), formatDate(adjustedEndDate)],
+      getWeekendDatesInRange(adjustedStartDate, adjustedEndDate).map(formatDate)
+    );
   };
 
   const getDaysInMonth = (year: number, month: number): number => {
@@ -151,43 +186,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setCurrentYear(newYear);
   };
 
-  const handlePredefinedRange = (range: string): void => {
-    const today = new Date();
-    let start = new Date();
-
-    switch (range) {
-      case "last7Days":
-        start = addDays(today, -7) ?? new Date();
-        while (isWeekend(start)) {
-          const newStart = addDays(start, -1);
-          if (!newStart) break;
-          start = newStart;
-        }
-        break;
-      case "last30Days":
-        start = addDays(today, -30) ?? new Date();
-        while (isWeekend(start)) {
-          const newStart = addDays(start, -1);
-          if (!newStart) break;
-          start = newStart;
-        }
-        break;
-      default:
-        return;
-    }
-
-    while (isWeekend(today)) {
-      today.setDate(today.getDate() - 1);
-    }
-
-    setStartDate(start);
-    setEndDate(today);
-    onChange?.(
-      [formatDate(start), formatDate(today)],
-      getWeekendDatesInRange(start, today).map(formatDate)
-    );
-  };
-
   const renderCalendar = (): JSX.Element => {
     const days = getDaysInMonth(currentYear, currentMonth);
     const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -252,16 +250,19 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     <div className="date-range-picker">
       <div className="calendar-container">{renderCalendar()}</div>
       {predefinedRanges.length > 0 && (
-        <div className="predefined-ranges">
-          {predefinedRanges.map((range) => (
-            <button
-              key={range.value}
-              onClick={() => handlePredefinedRange(range.value)}
-              className="range-button"
-            >
-              {range.label}
-            </button>
-          ))}
+        <div className="predefined-ranges-container">
+          <h3 className="predefined-ranges-title">Predefined Ranges</h3>
+          <div className="predefined-ranges-list">
+            {predefinedRanges.map((range, index) => (
+              <button
+                key={index}
+                className="predefined-range-button"
+                onClick={() => handlePredefinedRange(range)}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
