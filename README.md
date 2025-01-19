@@ -1,11 +1,20 @@
 # Date Range Picker
 
-A fully custim built calendar with feature choose and pick date ranges built using React and TypeScript
+### Features
 
-Pick a date range from the calendar
+1. **Custom Calendar**:  
+   - A fully custom-built calendar UI using React and TypeScript.  
+   - Allows users to select a date range.  
 
-Weekends are disabled and cannot be picked to choose date range
+2. **Weekend Disabling**:  
+   - Weekends (Saturday and Sunday) are disabled and cannot be selected.  
 
-Higlight the selected date range, excluding weekends
+3. **Highlighted Date Range**:  
+   - Highlights only the selected weekdays within the chosen range, excluding weekends.  
 
-Predefined date ranges- Lat 7/30 days, this month and last month
+4. **Predefined Ranges**:  
+   - Includes predefined date ranges such as:  
+     - Last 7 days  
+     - Last 30 days  
+     - This month  
+     - Last month
